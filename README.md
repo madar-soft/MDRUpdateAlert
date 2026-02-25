@@ -1,7 +1,7 @@
 # MDRUpdateAlert
 SDK for show alert for update Version, built on Firebase Remote Config.
 
-![firebase](https://raw.githubusercontent.com/madar-soft/MDRUpdateAlert/refs/heads/main/Images/MDRAlertUpdate.png?token=GHSAT0AAAAAADVBUAHVSLR2LLVBXNI6Z4VY2M7BFXA)
+![firebase](https://github.com/madar-soft/MDRUpdateAlert/blob/main/Media/firebase.png?raw=true)
 
 ## Overview
 - Supports forced, urgent, and normal updates.
