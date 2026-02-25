@@ -1,10 +1,5 @@
-<<<<<<< HEAD
 # MDRUpdateAlert
-sdk for show alert for update Version
-=======
-
-# MDRUpdateAlert
-A lightweight app update management system built on Firebase Remote Config.
+SDK for show alert for update Version, built on Firebase Remote Config.
 
 ## Overview
 - Supports forced, urgent, and normal updates.
@@ -22,9 +17,7 @@ A lightweight app update management system built on Firebase Remote Config.
 - Offline → Fallback.
 - App Updated → Clear cache + show success alert.
 
-=================================================
 # Implementation Steps 
-=================================================
 
 ## Step 1 – Import
 
@@ -49,13 +42,13 @@ let updateConfig = AppUpdateManager.Config(
 ```
 
 ## Step 3 – Setup
-
+=> inside AppDelegate 
 ```swift
-AppUpdateManager.shared.setup(with: updateConfig)
+AppUpdateManager.shared.setup(with: updateConfig) 
 ```
 
 ## Step 4 – Check for Updates
-### => with every network request
+=> with every network request
 
 ```swift
 func checkforUpdate(strURL: String) {
@@ -70,4 +63,3 @@ func checkforUpdate(strURL: String) {
     }
 }
 ```
->>>>>>> 35f87d3 (Fixes & Improvements)
