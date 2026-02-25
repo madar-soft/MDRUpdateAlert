@@ -21,11 +21,14 @@ public actor UpdateConfigProvider {
     
     private let currentVersion = Bundle.main.versionString
     private(set) var isAppUpdated: Bool = false
-     
+    
     private let cacheStore: UpdateCacheStoring
     private let remoteFetcher: UpdateRemoteFetching
     private let validator: CacheValidator
-
+    
+    // fetch only once per session
+    private var didFetchThisSession = false
+    
     //MARK: - Init
     
     public init(
@@ -37,56 +40,74 @@ public actor UpdateConfigProvider {
         self.remoteFetcher = remoteFetcher
         self.validator = CacheValidator(timing: timing)
     }
-
+    
     //MARK: - Methods
     
     public func getConfig(offlineMode: Bool) async -> UpdateRemoteConfig? {
         isAppUpdated = false
         
-        /// load cache if exists ====================================================
+        // ===================================================
+        // STEP 1: Try cache first (always)
+        // ===================================================
         
         if let cached = cacheStore.load() {
             let cache = validator.validate(cached, currentAppVersion: currentVersion)
-            
+             
             switch cache {
-            // Cache is Valid
             case .valid:
+                // Cache is valid - use it
                 return cached.config
-            
-            // App Updated
+                
             case .appUpdated:
+                // App already updated - clear cache
                 isAppUpdated = true
                 cacheStore.clear()
                 return nil
                 
-            // Cache Expired
             case .expired, .appDowngraded:
+                // Cache expired - we'll try to fetch if online
                 break
             }
             
-            // cache expired but offline
+            // Cache expired but offline - return expired cache as fallback
             if offlineMode {
                 return cached.config
             }
         }
-
-        /// If offline and no cache ===================================================
+        
+        // ===================================================
+        // STEP 2: No valid cache, check if we're offline
+        // ===================================================
         
         if offlineMode {
             return nil
         }
-
-        /// try fetching from remote =================================================
+         
+        // ===================================================
+        // STEP 3: Try to fetch from remote (ONCE per session)
+        // ===================================================
+        
+        // If we already fetched this session, don't fetch again
+        // just used cached config, in this case
+        guard !didFetchThisSession else {
+            return cacheStore.load()?.config
+        }
         
         do {
             let remote = try await remoteFetcher.fetchRemoteConfig()
-            // => Save cache
+            // => Save to cache
             cacheStore.save(CachedUpdateConfig(appVersion: currentVersion, config: remote))
+            didFetchThisSession = true // Mark that we've fetched this session
             return remote
             
         } catch {
-            // If fetch fails => fallback to cache if exists
+            // Fetch failed => fallback to cache
             return cacheStore.load()?.config
         }
+    }
+    
+    // Call this when app starts a new session (cold launch)
+    public func resetSession() {
+        didFetchThisSession = false
     }
 }

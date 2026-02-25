@@ -100,6 +100,11 @@ public class AppUpdateManager {
             presenter: presenter
         )
         
+        // Reset session state on setup (app cold launch)
+        Task {
+            await updateManager?.resetSession()
+        }
+        
         return self
     }
     

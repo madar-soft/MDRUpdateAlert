@@ -9,6 +9,7 @@
 
 public protocol UpdateManaging {
     func checkForUpdate(currentVersion: String, offlineMode: Bool, updateUrl: String, allowSkip: Bool) async -> UpdateState
+    func resetSession() async
 }
 
 //MARK: - Implementation
@@ -29,11 +30,8 @@ public final class UpdateManager: UpdateManaging {
         self.decisionEngine = decisionEngine
         self.reminderEngine = reminderEngine
         self.presenter = presenter
-         
-        // Reset session state for urgent alerts
-        reminderEngine?.resetSessionState()
     }
-    
+     
     public func checkForUpdate(currentVersion: String, offlineMode: Bool, updateUrl: String,
                                allowSkip: Bool) async -> UpdateState {
         
@@ -91,5 +89,10 @@ public final class UpdateManager: UpdateManaging {
             // no alerts
             return .none
         }
+    }
+    
+    public func resetSession() async {
+        await provider.resetSession()
+        reminderEngine?.resetSessionState()
     }
 }
