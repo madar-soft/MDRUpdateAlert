@@ -20,7 +20,7 @@ public final class UpdateManager: UpdateManaging {
     private let reminderEngine: UpdateReminderEngine?
     private let presenter: UpdateAlertPresenting?
     
-    public init(
+    init(
         provider: UpdateConfigProvider,
         decisionEngine: UpdateDecisionEngine = .init(),
         reminderEngine: UpdateReminderEngine? = nil,
@@ -37,11 +37,25 @@ public final class UpdateManager: UpdateManaging {
         
         // get remote (or cached) config
         guard let config = await provider.getConfig(offlineMode: offlineMode) else {
-            if await provider.isAppUpdated {
-                // App Updated Successfully 🎉
-                await presenter?.presentAppUpdatedAlert()
-            }
-            
+            return .none
+        }
+         
+        // App Updated Successfully 🎉
+        guard await !provider.isAppUpdated else {
+            await presenter?.presentAppUpdatedAlert()
+            return .none
+        }
+
+        // evaluate decision
+        let state = decisionEngine.evaluate(
+            config: config,
+            currentVersion: currentVersion
+        )
+
+        guard state != .none else { return .none }
+        
+        // Allow to skip, if state not forced
+        if allowSkip && state != .forced {
             return .none
         }
         
@@ -54,23 +68,9 @@ public final class UpdateManager: UpdateManaging {
         print(" - Latest version: \(config.latestVersion)")
         print(" - Minimum version: \(config.minimumVersion)")
         print(" - Manager Override: \(config.managerOverride)")
-
-        // evaluate decision
-        let state = decisionEngine.evaluate(
-            config: config,
-            currentVersion: currentVersion
-        )
-         
         print("---------- Update Decision ----------")
         print(" - Update Status: \(state)")
         print("==============================================")
-
-        guard state != .none else { return .none }
-        
-        // Allow to skip, if state not forced
-        if allowSkip && state != .forced {
-            return .none
-        }
         
         // Check if we should show based on reminder timing
         if let reminderEngine = reminderEngine, reminderEngine.shouldShowAlert(for: state) {

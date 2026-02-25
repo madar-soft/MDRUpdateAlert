@@ -9,7 +9,7 @@ import Foundation
 
 //MARK: - Protocol
 
-public protocol UpdateReminderEngine: AnyObject {
+public protocol UpdateReminderEngineProtocol: AnyObject {
     func shouldShowAlert(for state: UpdateState) -> Bool
     func markAlertShown(for state: UpdateState)
     func resetSessionState()
@@ -19,7 +19,7 @@ public protocol UpdateReminderEngine: AnyObject {
 
 import UIKit
 
-final class DefaultUpdateReminderEngine: UpdateReminderEngine {
+final class UpdateReminderEngine: UpdateReminderEngineProtocol {
     private let store: UpdateReminderStoring
     private let timing: UpdateTimingConfig
     private let now: () -> Date

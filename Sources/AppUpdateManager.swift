@@ -41,7 +41,7 @@ public class AppUpdateManager {
             
             latestVersionFirebaseKey: String = "latest_version",
             minimumVersionFirebaseKey: String = "minimum_version",
-            managerOverrideFirebaseKey: String = "manager_override",
+            managerOverrideFirebaseKey: String = "manager_override"
         ) {
             self.appStoreID = appStoreID
             self.isArabic = isArabic
@@ -81,7 +81,7 @@ public class AppUpdateManager {
         )
         
         // Setup reminder engine
-        let reminderEngine = DefaultUpdateReminderEngine(
+        let reminderEngine = UpdateReminderEngine(
             store: UserDefaultsReminderStore(),
             timing: timing
         )
