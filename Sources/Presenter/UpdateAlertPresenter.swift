@@ -28,6 +28,8 @@ final class UpdateAlertPresenter: UpdateAlertPresenting {
     private let viewControllerProvider: () -> UIViewController?
     private let isArabic: Bool
 
+    private var isPresenting = false
+    
     init(viewControllerProvider: @escaping () -> UIViewController?, isArabic: Bool) {
         self.viewControllerProvider = viewControllerProvider
         self.isArabic = isArabic
@@ -40,9 +42,13 @@ final class UpdateAlertPresenter: UpdateAlertPresenting {
     ) {
         guard state != .none else { return }
         guard let vc = viewControllerProvider() else { return }
+        
+        // If already presenting an alert, ignore this one completely
+        guard !isPresenting else { return }
+        isPresenting = true
 
         let config = makeConfig(for: state)
-
+        
         let alert = UIAlertController(
             title: config.title,
             message: config.message,
@@ -50,12 +56,14 @@ final class UpdateAlertPresenter: UpdateAlertPresenting {
         )
         
         if config.showsLater {
-            alert.addAction(UIAlertAction(title: laterButtonTitle, style: .cancel) { _ in
+            alert.addAction(UIAlertAction(title: laterButtonTitle, style: .cancel) { [weak self] _ in
+                self?.isPresenting = false // Reset flag
                 onLater()
             })
         }
-        
-        alert.addAction(UIAlertAction(title: updateButtonTitle, style: .default) { _ in
+         
+        alert.addAction(UIAlertAction(title: updateButtonTitle, style: .default) { [weak self] _ in
+            self?.isPresenting = false // Reset flag
             guard let url = URL(string: updateURL), UIApplication.shared.canOpenURL(url) else { return }
             UIApplication.shared.open(url)
         })
@@ -67,6 +75,10 @@ final class UpdateAlertPresenter: UpdateAlertPresenting {
     
     func presentAppUpdatedAlert() {
         guard let vc = viewControllerProvider() else { return }
+        
+        // If already presenting an alert, ignore this one completely
+        guard !isPresenting else { return }
+        isPresenting = true
 
         let alert = UIAlertController(
             title: updatedSuccessfullyTitle,
@@ -74,8 +86,8 @@ final class UpdateAlertPresenter: UpdateAlertPresenting {
             preferredStyle: .alert
         )
         
-        alert.addAction(UIAlertAction(title: successButtonTitle, style: .default) { _ in
-            // do nothing ...
+        alert.addAction(UIAlertAction(title: successButtonTitle, style: .default) { [weak self] _ in
+            self?.isPresenting = false // Reset flag
         })
         
         DispatchQueue.main.async {
