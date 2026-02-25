@@ -37,15 +37,11 @@ public final class UpdateManager: UpdateManaging {
         
         // get remote (or cached) config
         guard let config = await provider.getConfig(offlineMode: offlineMode) else {
+            // App Updated Successfully 🎉
+            if await provider.isAppUpdated { await presenter?.presentAppUpdatedAlert() }
             return .none
         }
          
-        // App Updated Successfully 🎉
-        guard await !provider.isAppUpdated else {
-            await presenter?.presentAppUpdatedAlert()
-            return .none
-        }
-
         // evaluate decision
         let state = decisionEngine.evaluate(
             config: config,
@@ -60,15 +56,15 @@ public final class UpdateManager: UpdateManaging {
         }
         
         print("=========== MDRUpdateAlert ===================")
-        print("---------- Current App Data -----------------")
+        print("---------- Current App Data ------------------")
         print(" * currentVersion => \(currentVersion)")
         print(" * Offline Mode => \(offlineMode)")
         print(" * updateUrl => \(updateUrl)")
-        print("---------- Remote or Cached Config ----------")
+        print("---------- Remote or Cached Config -----------")
         print(" - Latest version: \(config.latestVersion)")
         print(" - Minimum version: \(config.minimumVersion)")
         print(" - Manager Override: \(config.managerOverride)")
-        print("---------- Update Decision ----------")
+        print("---------- Update Decision -------------------")
         print(" - Update Status: \(state)")
         print("==============================================")
         

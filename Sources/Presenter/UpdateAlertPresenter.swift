@@ -162,7 +162,7 @@ private extension UpdateAlertPresenter {
     }
     
     var updatedSuccessfullyTitle: String {
-        isArabic ? "🎉 تم التحديث التطبيق بنجاح" : "App Updated Successfully 🎉"
+        isArabic ? "🎉 تم تحديث التطبيق بنجاح" : "App Updated Successfully 🎉"
     }
     
     // Alert Messages

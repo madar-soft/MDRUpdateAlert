@@ -66,10 +66,6 @@ public actor UpdateConfigProvider {
             do {
                 let remote = try await remoteFetcher.fetchRemoteConfig()
                 
-                // Check if app is already up to date
-                let comparison = currentVersion.compare(remote.latestVersion, options: .numeric)
-                isAppUpdated = (comparison != .orderedAscending)  // Current >= remote
-                 
                 // Save to cache
                 cacheStore.save(CachedUpdateConfig(
                     appVersion: currentVersion,
@@ -78,6 +74,19 @@ public actor UpdateConfigProvider {
                 ))
                 
                 didFetchThisSession = true
+                
+                // Check if app is already up to date
+                if !remote.latestVersion.isEmpty {
+                    let appStore = Version(remote.latestVersion)
+                    let current = Version(currentVersion)
+                     
+                    if current >= appStore {
+                        // No config needed, app already updated
+                        isAppUpdated = true
+                        return nil
+                    }
+                }
+                
                 return remote
                 
             } catch {
@@ -98,10 +107,6 @@ public actor UpdateConfigProvider {
     }
     
     // MARK: - Helpers
-    
-    private func isVersion(_ version1: String, newerThan version2: String) -> Bool {
-        return version1.compare(version2, options: .numeric) == .orderedDescending
-    }
     
     // Call this when app starts a new session (cold launch)
     public func resetSession() {
