@@ -8,10 +8,12 @@
 import Foundation
 
 public struct CachedUpdateConfig: Codable {
+    public let appVersion: String
     public let config: UpdateRemoteConfig
     public let savedAt: Date
-
-    public init(config: UpdateRemoteConfig, savedAt: Date = Date()) {
+    
+    public init(appVersion: String, config: UpdateRemoteConfig, savedAt: Date = Date()) {
+        self.appVersion = appVersion
         self.config = config
         self.savedAt = savedAt
     }

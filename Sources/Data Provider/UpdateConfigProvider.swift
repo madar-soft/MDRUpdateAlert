@@ -15,10 +15,13 @@ public protocol UpdateRemoteFetching {
 
 //MARK: - Implementation
 
-public final class UpdateConfigProvider {
+public actor UpdateConfigProvider {
     
     //MARK: - Properties
     
+    private let currentVersion = Bundle.main.versionString
+    private(set) var isAppUpdated: Bool = false
+     
     private let cacheStore: UpdateCacheStoring
     private let remoteFetcher: UpdateRemoteFetching
     private let validator: CacheValidator
@@ -37,17 +40,30 @@ public final class UpdateConfigProvider {
 
     //MARK: - Methods
     
-    public func getConfig(offlineMode: Bool, now: Date = Date()) async -> UpdateRemoteConfig? {
+    public func getConfig(offlineMode: Bool) async -> UpdateRemoteConfig? {
+        isAppUpdated = false
         
         /// load cache if exists ====================================================
         
         if let cached = cacheStore.load() {
-
-            // if cache valid
-            if validator.isCacheValid(cached, now: now) {
+            let cache = validator.validate(cached, currentAppVersion: currentVersion)
+            
+            switch cache {
+            // Cache is Valid
+            case .valid:
                 return cached.config
+            
+            // App Updated
+            case .appUpdated:
+                isAppUpdated = true
+                cacheStore.clear()
+                return nil
+                
+            // Cache Expired
+            case .expired, .appDowngraded:
+                break
             }
-
+            
             // cache expired but offline
             if offlineMode {
                 return cached.config
@@ -65,7 +81,7 @@ public final class UpdateConfigProvider {
         do {
             let remote = try await remoteFetcher.fetchRemoteConfig()
             // => Save cache
-            cacheStore.save(CachedUpdateConfig(config: remote))
+            cacheStore.save(CachedUpdateConfig(appVersion: currentVersion, config: remote))
             return remote
             
         } catch {

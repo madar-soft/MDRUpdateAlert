@@ -8,18 +8,17 @@
 //MARK: - Protocol
 
 public protocol UpdateManaging {
-    func checkForUpdate(currentVersion: String, offlineMode: Bool, updateUrl: String) async -> UpdateState
-    func resetSessionState()
+    func checkForUpdate(currentVersion: String, offlineMode: Bool, updateUrl: String, allowSkip: Bool) async -> UpdateState
 }
 
 //MARK: - Implementation
-
+ 
 public final class UpdateManager: UpdateManaging {
     private let provider: UpdateConfigProvider
     private let decisionEngine: UpdateDecisionEngine
     private let reminderEngine: UpdateReminderEngine?
     private let presenter: UpdateAlertPresenting?
-     
+    
     public init(
         provider: UpdateConfigProvider,
         decisionEngine: UpdateDecisionEngine = .init(),
@@ -30,105 +29,67 @@ public final class UpdateManager: UpdateManaging {
         self.decisionEngine = decisionEngine
         self.reminderEngine = reminderEngine
         self.presenter = presenter
-        
+         
+        // Reset session state for urgent alerts
         reminderEngine?.resetSessionState()
     }
     
-    public func resetSessionState() {
-        reminderEngine?.resetSessionState()
-    }
-    
-    public func checkForUpdate(currentVersion: String, offlineMode: Bool, updateUrl: String) async -> UpdateState {
-        print("🔍 Checking for update - Current version: \(currentVersion), Offline mode: \(offlineMode), updateURL: \(updateUrl)")
+    public func checkForUpdate(currentVersion: String, offlineMode: Bool, updateUrl: String,
+                               allowSkip: Bool) async -> UpdateState {
         
         // get remote (or cached) config
         guard let config = await provider.getConfig(offlineMode: offlineMode) else {
-            print("❌ Failed to get config from provider (offlineMode: \(offlineMode))")
+            if await provider.isAppUpdated {
+                // App Updated Successfully 🎉
+                await presenter?.presentAppUpdatedAlert()
+            }
+            
             return .none
         }
         
-        print("✅ Got config from provider:")
-        print("   - Latest version: \(config.latestVersion)")
-        print("   - Minimum version: \(config.minimumVersion)")
-        print("   - Manager Override: \(config.managerOverride)")
-        
+        print("=========== MDRUpdateAlert ===================")
+        print("---------- Current App Data -----------------")
+        print(" * currentVersion => \(currentVersion)")
+        print(" * Offline Mode => \(offlineMode)")
+        print(" * updateUrl => \(updateUrl)")
+        print("---------- Remote or Cached Config ----------")
+        print(" - Latest version: \(config.latestVersion)")
+        print(" - Minimum version: \(config.minimumVersion)")
+        print(" - Manager Override: \(config.managerOverride)")
+
         // evaluate decision
         let state = decisionEngine.evaluate(
             config: config,
             currentVersion: currentVersion
         )
+         
+        print("---------- Update Decision ----------")
+        print(" - Update Status: \(state)")
+        print("==============================================")
+
+        guard state != .none else { return .none }
         
-        print("📊 Decision engine evaluation result: \(state)")
-        print("   - Current version: \(currentVersion)")
-        print("   - Latest version: \(config.latestVersion)")
-        
-        // Version comparison details
-        let currentComponents = currentVersion.split(separator: ".").map(String.init)
-        let latestComponents = config.latestVersion.split(separator: ".").map(String.init)
-        print("   - Version components comparison: \(currentComponents) vs \(latestComponents)")
-        
-        guard state != .none else {
-            print("⏭️ State is .none - no update needed or decision engine returned none")
+        // Allow to skip, if state not forced
+        if allowSkip && state != .forced {
             return .none
         }
         
         // Check if we should show based on reminder timing
         if let reminderEngine = reminderEngine, reminderEngine.shouldShowAlert(for: state) {
-            print("✅ Reminder engine says: should show alert for state: \(state)")
-            
             // present alert
             await presenter?.presentAlert(
                 for: state,
                 updateURL: updateUrl,
                 onLater: { [weak self] in
-                    print("⏰ User tapped 'Later' - marking alert as shown")
-                    self?.reminderEngine?.markAlertShown()
+                    self?.reminderEngine?.markAlertShown(for: state)
                 }
             )
             
-            print("✅ Alert presented for state: \(state)")
             return state
             
         } else {
-            if reminderEngine == nil {
-                print("⚠️ reminderEngine is nil")
-            } else {
-                print("⏭️ Reminder engine says: should NOT show alert for state: \(state)")
-            }
+            // no alerts
             return .none
         }
     }
-     
-//    public func checkForUpdate(currentVersion: String, offlineMode: Bool, updateUrl: String) async -> UpdateState {
-//        // get remote (or cached) config
-//        guard let config = await provider.getConfig(offlineMode: offlineMode) else {
-//            return .none
-//        }
-//
-//        // evaluate decision
-//        let state = decisionEngine.evaluate(
-//            config: config,
-//            currentVersion: currentVersion
-//        )
-//
-//        guard state != .none else { return .none }
-//        
-//        // Check if we should show based on reminder timing
-//        if let reminderEngine = reminderEngine, reminderEngine.shouldShowAlert(for: state) {
-//            // present alert
-//            await presenter?.presentAlert(
-//                for: state,
-//                updateURL: updateUrl,
-//                onLater: { [weak self] in
-//                    self?.reminderEngine?.markAlertShown()
-//                }
-//            )
-//            
-//            return state
-//            
-//        } else {
-//            // no alerts
-//            return .none
-//        }
-//    }
 }

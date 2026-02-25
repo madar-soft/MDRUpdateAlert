@@ -16,6 +16,8 @@ public protocol UpdateAlertPresenting {
         updateURL: String,
         onLater: @escaping () -> Void
     )
+    
+    func presentAppUpdatedAlert()
 }
 
 //MARK: - Implementation
@@ -56,6 +58,24 @@ final class UpdateAlertPresenter: UpdateAlertPresenting {
         alert.addAction(UIAlertAction(title: updateButtonTitle, style: .default) { _ in
             guard let url = URL(string: updateURL), UIApplication.shared.canOpenURL(url) else { return }
             UIApplication.shared.open(url)
+        })
+        
+        DispatchQueue.main.async {
+            vc.present(alert, animated: true)
+        }
+    }
+    
+    func presentAppUpdatedAlert() {
+        guard let vc = viewControllerProvider() else { return }
+
+        let alert = UIAlertController(
+            title: updatedSuccessfullyTitle,
+            message: updatedSuccessfullyMessage,
+            preferredStyle: .alert
+        )
+        
+        alert.addAction(UIAlertAction(title: successButtonTitle, style: .default) { _ in
+            // do nothing ...
         })
         
         DispatchQueue.main.async {
@@ -103,12 +123,17 @@ private extension UpdateAlertPresenter {
 //MARK: - Localized Strings
 
 private extension UpdateAlertPresenter {
+    // Alert Buttons
     var laterButtonTitle: String {
         isArabic ? "لاحقاً" : "Later"
     }
     
     var updateButtonTitle: String {
         isArabic ? "تحديث الآن" : "Update Now"
+    }
+    
+    var successButtonTitle: String {
+        isArabic ? "حسناً" : "OK"
     }
     
     // Alert Titles
@@ -124,6 +149,10 @@ private extension UpdateAlertPresenter {
         isArabic ? "تحديث إلزامي" : "Update Required"
     }
     
+    var updatedSuccessfullyTitle: String {
+        isArabic ? "🎉 تم التحديث التطبيق بنجاح" : "App Updated Successfully 🎉"
+    }
+    
     // Alert Messages
     var normalUpdateMessage: String {
         isArabic ? "نسخة أحدث من التطبيق متوفرة." : "A newer version is available."
@@ -135,5 +164,11 @@ private extension UpdateAlertPresenter {
     
     var forcedUpdateMessage: String {
         isArabic ? "يجب عليك التحديث لمواصلة استخدام التطبيق." : "You must update to continue using the app."
+    }
+    
+    var updatedSuccessfullyMessage: String {
+        isArabic
+        ? "شكراً لتحديث التطبيق. استمتع بأحدث المزايا والتحسينات."
+        : "Thanks for updating! Enjoy the latest features and improvements."
     }
 }

@@ -12,6 +12,7 @@ import Foundation
 public protocol UpdateCacheStoring {
     func load() -> CachedUpdateConfig?
     func save(_ config: CachedUpdateConfig)
+    func clear()
 }
 
 //MARK: - Implementation
@@ -42,5 +43,9 @@ public final class UserDefaultsCacheStore: UpdateCacheStoring {
     public func save(_ config: CachedUpdateConfig) {
         guard let data = try? JSONEncoder().encode(config) else { return }
         userDefaults.set(data, forKey: cacheKey)
+    }
+    
+    public func clear() {
+        userDefaults.removeObject(forKey: cacheKey)
     }
 }

@@ -51,9 +51,9 @@ final class DefaultUpdateReminderEngine: UpdateReminderEngine {
             
         case .normal:
             guard let lastShown = store.lastShownDate() else { return true } // First time
-            
+             
             let timeSinceLastShown = now().timeIntervalSince(lastShown)
-            return timeSinceLastShown >= timing.normalReminderInterval // show based on time interval (default 5 days)
+            return timeSinceLastShown >= timing.normalReminderInterval // show every "x" days (default 5 days)
             
         case .none:
             return false // Never show
