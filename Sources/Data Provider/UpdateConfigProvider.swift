@@ -112,4 +112,8 @@ public actor UpdateConfigProvider {
     public func resetSession() {
         didFetchThisSession = false
     }
+    
+    public func clearCache() {
+        self.cacheStore.clear()
+    }
 }

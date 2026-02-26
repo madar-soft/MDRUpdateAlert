@@ -39,17 +39,22 @@ public final class UpdateManager: UpdateManaging {
         guard let config = await provider.getConfig(offlineMode: offlineMode) else {
             // App Updated Successfully 🎉
             if await provider.isAppUpdated { await presenter?.presentAppUpdatedAlert() }
+            
+            await provider.clearCache()
             return .none
         }
-         
+        
         // evaluate decision
         let state = decisionEngine.evaluate(
             config: config,
             currentVersion: currentVersion
         )
-
-        guard state != .none else { return .none }
         
+        guard state != .none else {
+            await provider.clearCache()
+            return .none
+        }
+         
         // Allow to skip, if state not forced
         if allowSkip && state != .forced {
             return .none
@@ -67,7 +72,7 @@ public final class UpdateManager: UpdateManaging {
         print("---------- Update Decision -------------------")
         print(" - Update Status: \(state)")
         print("==============================================")
-        
+         
         // Check if we should show based on reminder timing
         if let reminderEngine = reminderEngine, reminderEngine.shouldShowAlert(for: state) {
             // present alert
@@ -83,6 +88,7 @@ public final class UpdateManager: UpdateManaging {
             
         } else {
             // no alerts
+            await provider.clearCache()
             return .none
         }
     }
