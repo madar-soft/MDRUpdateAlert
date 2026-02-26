@@ -1,6 +1,8 @@
 # MDRUpdateAlert
 SDK for show alert for update Version, built on Firebase Remote Config.
-=> Firebase Console: Run/Remote Config
+
+> Firebase Console: Run/Remote Config
+> 
 ![firebase](https://github.com/madar-soft/MDRUpdateAlert/blob/main/Media/firebase.png?raw=true)
 
 ## Overview
