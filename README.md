@@ -16,10 +16,10 @@ SDK for show alert for update Version, built on Firebase Remote Config.
 2. Call `checkForUpdate()` after network calls.
 
 ## Update Flow
-- First Launch → Fetch → Cache → Evaluate.
-- Cached → Use cache.
-- Offline → Fallback.
-- App Updated → Clear cache + show success alert.
+- New Session → Fetch → Cache → Evaluate.
+- Cached → Use cache `"expired after 24 hrs"`
+- Offline → Fallback to cache
+- App Updated → show success alert + Clear cache
 
 # Implementation Steps 
 
