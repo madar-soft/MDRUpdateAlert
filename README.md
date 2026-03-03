@@ -30,18 +30,60 @@ import MadarUpdater
 ```
 
 ## Step 2 – Configure
-
+Minimal config: 
 ```swift
 let updateConfig = AppUpdateManager.Config(
     appStoreID: "1343105318",
-    isArabic: applicationLanguage != "en",
+    isArabic: applicationLanguage != "en"
+)
+```
+All default values are customizable: 
+```swift
+let isArabic = applicationLanguage != "en"
+
+let updateConfig = AppUpdateManager.Config(
+    appStoreID: "1343105318",
+    isArabic: isArabic,
     
-    cacheExpiry: 24 * 60 * 60, // every 24 hrs
+    cacheExpiry: 24 * 60 * 60, // after 24 hrs
     normalReminderInterval: 120 * 60 * 60, // every 5 days
     
     latestVersionFirebaseKey: "latest_version",
     minimumVersionFirebaseKey: "minimum_version",
-    managerOverrideFirebaseKey: "manager_override"
+    managerOverrideFirebaseKey: "manager_override",
+    
+    // Normal
+    normalUpdateTitle: isArabic ? "تحديث متوفر" : "Update Available",
+    normalUpdateMessage: isArabic
+        ? "نسخة أحدث من التطبيق متوفرة."
+        : "A newer version is available.",
+    
+    // Urgent
+    urgentUpdateTitle: isArabic ? "تحديث موصى به" : "Update Recommended",
+    urgentUpdateMessage: isArabic
+        ? "يرجى التحديث للحصول على أفضل تجربة."
+        : "Please update for the best experience.",
+    
+    // Forced
+    forcedUpdateTitle: isArabic ? "تحديث إلزامي" : "Update Required",
+    forcedUpdateMessage: isArabic
+        ? "يجب عليك التحديث لمواصلة استخدام التطبيق."
+        : "You must update to continue using the app.",
+    
+    // Buttons
+    laterButtonTitle: isArabic ? "لاحقاً" : "Later",
+    updateButtonTitle: isArabic ? "تحديث الآن" : "Update Now",
+    
+    // Success
+    updatedSuccessfullyTitle: isArabic
+        ? "🎉 تم تحديث التطبيق بنجاح"
+        : "App Updated Successfully 🎉",
+    
+    updatedSuccessfullyMessage: isArabic
+        ? "شكراً لتحديث التطبيق. استمتع بأحدث المزايا والتحسينات."
+        : "Thanks for updating! Enjoy the latest features and improvements.",
+    
+    successButtonTitle: isArabic ? "حسناً" : "OK"
 )
 ```
 
