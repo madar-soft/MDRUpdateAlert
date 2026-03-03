@@ -65,7 +65,7 @@ public actor UpdateConfigProvider {
         if !didFetchThisSession {
             do {
                 let remote = try await remoteFetcher.fetchRemoteConfig()
-                
+                 
                 // Save to cache
                 cacheStore.save(CachedUpdateConfig(
                     appVersion: currentVersion,
@@ -81,9 +81,13 @@ public actor UpdateConfigProvider {
                     let current = Version(currentVersion)
                      
                     if current >= appStore {
-                        // No config needed, app already updated
-                        isAppUpdated = true
-                        return nil
+                        guard let cached = cacheStore.load() else { return remote }
+                        let cachedAppVersion = Version(cached.appVersion)
+                        
+                        if current > cachedAppVersion {
+                            isAppUpdated = true
+                            return nil
+                        }
                     }
                 }
                 

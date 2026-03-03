@@ -33,3 +33,11 @@ struct Version: Comparable {
         return false
     }
 }
+
+// MARK: - Bundle Extension
+
+extension Bundle {
+    var versionString: String {
+        infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.0"
+    }
+}

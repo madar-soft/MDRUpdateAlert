@@ -31,16 +31,18 @@ public final class UpdateManager: UpdateManaging {
         self.reminderEngine = reminderEngine
         self.presenter = presenter
     }
-     
+    
     public func checkForUpdate(currentVersion: String, offlineMode: Bool, updateUrl: String,
                                allowSkip: Bool) async -> UpdateState {
         
         // get remote (or cached) config
         guard let config = await provider.getConfig(offlineMode: offlineMode) else {
             // App Updated Successfully 🎉
-            if await provider.isAppUpdated { await presenter?.presentAppUpdatedAlert() }
+            if await provider.isAppUpdated && !allowSkip {
+                await presenter?.presentAppUpdatedAlert()
+                await provider.clearCache()
+            }
             
-            await provider.clearCache()
             return .none
         }
         
@@ -51,7 +53,6 @@ public final class UpdateManager: UpdateManaging {
         )
         
         guard state != .none else {
-            await provider.clearCache()
             return .none
         }
          
@@ -75,10 +76,11 @@ public final class UpdateManager: UpdateManaging {
          
         // Check if we should show based on reminder timing
         if let reminderEngine = reminderEngine, reminderEngine.shouldShowAlert(for: state) {
-            // present alert
             await presenter?.presentAlert(
-                for: state,
-                updateURL: updateUrl,
+                for: state, updateURL: updateUrl,
+                onUpdate: { [weak self] in
+                    self?.reminderEngine?.markAlertShown(for: state)
+                },
                 onLater: { [weak self] in
                     self?.reminderEngine?.markAlertShown(for: state)
                 }
@@ -88,7 +90,6 @@ public final class UpdateManager: UpdateManaging {
             
         } else {
             // no alerts
-            await provider.clearCache()
             return .none
         }
     }

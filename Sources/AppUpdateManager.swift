@@ -24,14 +24,39 @@ public class AppUpdateManager {
     // MARK: - Public Config
      
     public struct Config {
+        
+        // Must Have ================================
+        
         public let appStoreID: String
         public let isArabic: Bool
+        
+        // Optional =================================
+        
+        // Timing
         public let cacheExpiry: TimeInterval
         public let normalReminderInterval: TimeInterval
         
+        // Firebase Keys
         public let latestVersionFirebaseKey: String
         public let minimumVersionFirebaseKey: String
         public let managerOverrideFirebaseKey: String
+        
+        // Alert Strings
+        public let normalUpdateTitle: String
+        public let normalUpdateMessage: String
+
+        public let urgentUpdateTitle: String
+        public let urgentUpdateMessage: String
+        
+        public let forcedUpdateTitle: String
+        public let forcedUpdateMessage: String
+        
+        public let laterButtonTitle: String
+        public let updateButtonTitle: String
+
+        public let updatedSuccessfullyTitle: String
+        public let updatedSuccessfullyMessage: String
+        public let successButtonTitle: String
 
         public init(
             appStoreID: String,
@@ -41,7 +66,23 @@ public class AppUpdateManager {
             
             latestVersionFirebaseKey: String = "latest_version",
             minimumVersionFirebaseKey: String = "minimum_version",
-            managerOverrideFirebaseKey: String = "manager_override"
+            managerOverrideFirebaseKey: String = "manager_override",
+            
+            normalUpdateTitle: String? = nil,
+            normalUpdateMessage: String? = nil,
+            
+            urgentUpdateTitle: String? = nil,
+            urgentUpdateMessage: String? = nil,
+            
+            forcedUpdateTitle: String? = nil,
+            forcedUpdateMessage: String? = nil,
+            
+            laterButtonTitle: String? = nil,
+            updateButtonTitle: String? = nil,
+
+            updatedSuccessfullyTitle: String? = nil,
+            updatedSuccessfullyMessage: String? = nil,
+            successButtonTitle: String? = nil
         ) {
             self.appStoreID = appStoreID
             self.isArabic = isArabic
@@ -51,6 +92,52 @@ public class AppUpdateManager {
             self.latestVersionFirebaseKey = latestVersionFirebaseKey
             self.minimumVersionFirebaseKey = minimumVersionFirebaseKey
             self.managerOverrideFirebaseKey = managerOverrideFirebaseKey
+            
+            // Fallback to default Localization Generator
+            func localized(ar: String, en: String) -> String {
+                isArabic ? ar : en
+            }
+            
+            // Normal
+            self.normalUpdateTitle = normalUpdateTitle ??
+                localized(ar: "تحديث متوفر", en: "Update Available")
+
+            self.normalUpdateMessage = normalUpdateMessage ??
+                localized(ar: "نسخة أحدث من التطبيق متوفرة.", en: "A newer version is available.")
+            
+            // Urgent
+            self.urgentUpdateTitle = urgentUpdateTitle ??
+                localized(ar: "تحديث موصى به", en: "Update Recommended")
+
+            self.urgentUpdateMessage = urgentUpdateMessage ??
+                localized(ar: "يرجى التحديث للحصول على أفضل تجربة.", en: "Please update for the best experience.")
+
+            // Forced
+            self.forcedUpdateTitle = forcedUpdateTitle ??
+                localized(ar: "تحديث إلزامي", en: "Update Required")
+
+            self.forcedUpdateMessage = forcedUpdateMessage ??
+                localized(ar: "يجب عليك التحديث لمواصلة استخدام التطبيق.", en: "You must update to continue using the app.")
+            
+            // Buttons
+            self.laterButtonTitle = laterButtonTitle ??
+                localized(ar: "لاحقاً", en: "Later")
+
+            self.updateButtonTitle = updateButtonTitle ??
+                localized(ar: "تحديث الآن", en: "Update Now")
+
+            // Success
+            self.updatedSuccessfullyTitle = updatedSuccessfullyTitle ??
+                localized(ar: "🎉 تم تحديث التطبيق بنجاح", en: "App Updated Successfully 🎉")
+            
+            self.updatedSuccessfullyMessage = updatedSuccessfullyMessage ??
+                localized(
+                    ar: "شكراً لتحديث التطبيق. استمتع بأحدث المزايا والتحسينات.",
+                    en: "Thanks for updating! Enjoy the latest features and improvements."
+                )
+            
+            self.successButtonTitle = successButtonTitle ??
+                localized(ar: "حسناً", en: "OK")
         }
         
         var appStoreURL: String {
@@ -90,7 +177,7 @@ public class AppUpdateManager {
         let presenter = UpdateAlertPresenter(
             viewControllerProvider: { [weak self] in
                 self?.topViewController()
-            }, isArabic: config.isArabic
+            }, config: config
         )
         
         // Create update manager
