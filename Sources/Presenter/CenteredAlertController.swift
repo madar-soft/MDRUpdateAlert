@@ -11,7 +11,15 @@ import UIKit
 final class CenteredAlertController: UIAlertController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        
+        centerLabels()
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        centerLabels()
+    }
+    
+    private func centerLabels() {
         view.allSubviews
             .compactMap { $0 as? UILabel }
             .forEach { $0.textAlignment = .center }
