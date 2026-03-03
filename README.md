@@ -109,3 +109,41 @@ func checkforUpdate(strURL: String) {
     }
 }
 ```
+## Installation
+
+### Swift Package Manager
+
+MDRUpdateAlert is available through [Swift Package Manager](https://swift.org/package-manager/).
+
+#### Via Xcode
+
+1. In Xcode, go to **File → Add Package Dependencies**
+2. Paste the repository URL:
+```
+https://github.com/madar-soft/MDRUpdateAlert.git
+```
+3. Set the version rule to **Up to Next Major** from `1.0.0`
+4. Click **Add Package**
+
+#### Via `Package.swift`
+
+Add MDRUpdateAlert as a dependency in your `Package.swift`:
+```swift
+dependencies: [
+    .package(url: "https://github.com/madar-soft/MDRUpdateAlert.git", from: "1.0.0")
+],
+targets: [
+    .target(
+        name: "YourTarget",
+        dependencies: ["MDRUpdateAlert"]
+    )
+]
+```
+
+> **Note:** MDRUpdateAlert uses [Firebase Remote Config](https://firebase.google.com/docs/remote-config) under the hood (`firebase-ios-sdk 12.8.0+`), which will be resolved automatically as a transitive dependency.
+
+#### Requirements
+
+- iOS 15.0+
+- Swift 5.0+
+- Xcode 15+
