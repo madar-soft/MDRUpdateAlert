@@ -94,7 +94,7 @@ AppUpdateManager.shared.setup(with: updateConfig)
 ```
 
 ## Step 4 – Check for Updates
-=> with every network request
+=> with every base network request (GET, POST, ...)
 
 ```swift
 func checkforUpdate(strURL: String) {
