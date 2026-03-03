@@ -14,6 +14,7 @@ public protocol UpdateAlertPresenting {
     func presentAlert(
         for state: UpdateState,
         updateURL: String,
+        onUpdate: @escaping () -> Void,
         onLater: @escaping () -> Void
     )
     
@@ -26,18 +27,19 @@ public protocol UpdateAlertPresenting {
 final class UpdateAlertPresenter: UpdateAlertPresenting {
  
     private let viewControllerProvider: () -> UIViewController?
-    private let isArabic: Bool
-
+    private let config: AppUpdateManager.Config
+    
     private var isPresenting = false
     
-    init(viewControllerProvider: @escaping () -> UIViewController?, isArabic: Bool) {
+    init(viewControllerProvider: @escaping () -> UIViewController?, config: AppUpdateManager.Config) {
         self.viewControllerProvider = viewControllerProvider
-        self.isArabic = isArabic
+        self.config = config
     }
 
     func presentAlert(
         for state: UpdateState,
         updateURL: String,
+        onUpdate: @escaping () -> Void,
         onLater: @escaping () -> Void
     ) {
         guard state != .none else { return }
@@ -47,15 +49,15 @@ final class UpdateAlertPresenter: UpdateAlertPresenting {
         guard !isPresenting else { return }
         isPresenting = true
 
-        let config = makeConfig(for: state)
+        let alertConfig = makeConfig(for: state)
         
-        let alert = UIAlertController(
-            title: config.title,
-            message: config.message,
+        let alert = CenteredAlertController(
+            title: alertConfig.title,
+            message: alertConfig.message,
             preferredStyle: .alert
         )
         
-        if config.showsLater {
+        if alertConfig.showsLater {
             alert.addAction(UIAlertAction(title: laterButtonTitle, style: .cancel) { [weak self] _ in
                 self?.isPresenting = false // Reset flag
                 onLater()
@@ -64,13 +66,13 @@ final class UpdateAlertPresenter: UpdateAlertPresenting {
          
         alert.addAction(UIAlertAction(title: updateButtonTitle, style: .default) { [weak self] _ in
             self?.isPresenting = false // Reset flag
+            onUpdate()
+            
             guard let url = URL(string: updateURL), UIApplication.shared.canOpenURL(url) else { return }
             UIApplication.shared.open(url)
         })
         
-        DispatchQueue.main.async {
-            vc.present(alert, animated: true)
-        }
+        vc.present(alert, animated: true)
     }
     
     func presentAppUpdatedAlert() {
@@ -80,7 +82,7 @@ final class UpdateAlertPresenter: UpdateAlertPresenting {
         guard !isPresenting else { return }
         isPresenting = true
 
-        let alert = UIAlertController(
+        let alert = CenteredAlertController(
             title: updatedSuccessfullyTitle,
             message: updatedSuccessfullyMessage,
             preferredStyle: .alert
@@ -90,9 +92,7 @@ final class UpdateAlertPresenter: UpdateAlertPresenting {
             self?.isPresenting = false // Reset flag
         })
         
-        DispatchQueue.main.async {
-            vc.present(alert, animated: true)
-        }
+        vc.present(alert, animated: true)
     }
 }
 
@@ -136,51 +136,19 @@ private extension UpdateAlertPresenter {
 
 private extension UpdateAlertPresenter {
     // Alert Buttons
-    var laterButtonTitle: String {
-        isArabic ? "لاحقاً" : "Later"
-    }
+    var normalUpdateTitle: String { config.normalUpdateTitle }
+    var normalUpdateMessage: String { config.normalUpdateMessage }
+
+    var urgentUpdateTitle: String { config.urgentUpdateTitle }
+    var urgentUpdateMessage: String { config.urgentUpdateMessage }
     
-    var updateButtonTitle: String {
-        isArabic ? "تحديث الآن" : "Update Now"
-    }
+    var forcedUpdateTitle: String { config.forcedUpdateTitle }
+    var forcedUpdateMessage: String { config.forcedUpdateMessage }
     
-    var successButtonTitle: String {
-        isArabic ? "حسناً" : "OK"
-    }
-    
-    // Alert Titles
-    var normalUpdateTitle: String {
-        isArabic ? "تحديث متوفر" : "Update Available"
-    }
-    
-    var urgentUpdateTitle: String {
-        isArabic ? "تحديث موصى به" : "Update Recommended"
-    }
-    
-    var forcedUpdateTitle: String {
-        isArabic ? "تحديث إلزامي" : "Update Required"
-    }
-    
-    var updatedSuccessfullyTitle: String {
-        isArabic ? "🎉 تم تحديث التطبيق بنجاح" : "App Updated Successfully 🎉"
-    }
-    
-    // Alert Messages
-    var normalUpdateMessage: String {
-        isArabic ? "نسخة أحدث من التطبيق متوفرة." : "A newer version is available."
-    }
-    
-    var urgentUpdateMessage: String {
-        isArabic ? "يرجى التحديث للحصول على أفضل تجربة." : "Please update for the best experience."
-    }
-    
-    var forcedUpdateMessage: String {
-        isArabic ? "يجب عليك التحديث لمواصلة استخدام التطبيق." : "You must update to continue using the app."
-    }
-    
-    var updatedSuccessfullyMessage: String {
-        isArabic
-        ? "شكراً لتحديث التطبيق. استمتع بأحدث المزايا والتحسينات."
-        : "Thanks for updating! Enjoy the latest features and improvements."
-    }
+    var laterButtonTitle: String { config.laterButtonTitle }
+    var updateButtonTitle: String { config.updateButtonTitle }
+
+    var updatedSuccessfullyTitle: String { config.updatedSuccessfullyTitle }
+    var updatedSuccessfullyMessage: String { config.updatedSuccessfullyMessage }
+    var successButtonTitle: String { config.successButtonTitle }
 }
