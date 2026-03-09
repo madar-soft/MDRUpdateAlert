@@ -9,20 +9,29 @@ import Foundation
 import UIKit
 
 final class CenteredAlertController: UIAlertController {
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        centerLabels()
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        swizzleLabels()
     }
     
-    override func viewWillDisappear(_ animated: Bool) {
-        super.viewWillDisappear(animated)
-        centerLabels()
-    }
-    
-    private func centerLabels() {
+    private func swizzleLabels() {
+        // Replace every UILabel in the hierarchy with our locked subclass
         view.allSubviews
             .compactMap { $0 as? UILabel }
-            .forEach { $0.textAlignment = .center }
+            .forEach { label in
+                // Directly override textAlignment before anything else touches it
+                label.textAlignment = .center
+                object_setClass(label, CenterLockedLabel.self)
+            }
+    }
+}
+
+// A UILabel subclass that physically cannot have its alignment changed
+private final class CenterLockedLabel: UILabel {
+    override var textAlignment: NSTextAlignment {
+        get { .center }
+        set { super.textAlignment = .center } // Ignore any value, always center
     }
 }
 
