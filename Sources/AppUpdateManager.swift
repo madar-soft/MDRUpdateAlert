@@ -20,7 +20,7 @@ public class AppUpdateManager {
     
     private var updateManager: UpdateManaging?
     private var config: Config?
-    public var isArabic: Bool = false
+    public var isArabic: Bool = true
 
     // MARK: - Public Config
      
@@ -57,7 +57,7 @@ public class AppUpdateManager {
         public let updatedSuccessfullyTitle: String
         public let updatedSuccessfullyMessage: String
         public let successButtonTitle: String
-
+        
         public init(
             appStoreID: String,
             cacheExpiry: TimeInterval = 24 * 60 * 60,             // 1 day
@@ -149,6 +149,10 @@ public class AppUpdateManager {
     public func setup(with config: Config) -> Self {
         self.config = config
         
+        guard !config.appStoreID.isEmpty else {
+            fatalError("MDRUpdateAlert: appStoreID is required")
+        }
+        
         let timing = UpdateTimingConfig(
             cacheExpiry: config.cacheExpiry,
             normalReminderInterval: config.normalReminderInterval
@@ -202,15 +206,19 @@ public class AppUpdateManager {
         
         let currentVersion = Bundle.main.versionString
         let isOffline = !NetworkReachability.shared.isConnected
-         
-        return await manager.checkForUpdate(
-            currentVersion: currentVersion,
-            offlineMode: isOffline,
-            updateUrl: config.appStoreURL,
-            allowSkip: allowSkip
-        )
+        
+        // Task.detached moves Firebase fetching off the main thread entirely
+        // presenter inside still dispatches to @MainActor, so UI updates remain safe
+        return await Task.detached(priority: .background) {
+            await manager.checkForUpdate(
+                currentVersion: currentVersion,
+                offlineMode: isOffline,
+                updateUrl: config.appStoreURL,
+                allowSkip: allowSkip
+            )
+        }.value
     }
-    
+ 
     public func checkForUpdate(completion: @escaping (UpdateState) -> Void) {
         Task {
             let state = await checkForUpdate()
