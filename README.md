@@ -26,25 +26,19 @@ SDK for show alert for update Version, built on Firebase Remote Config.
 ## Step 1 – Import
 
 ```swift
-import MadarUpdater
+import MDRUpdateAlert
 ```
 
 ## Step 2 – Configure
 Minimal config: 
 ```swift
-let updateConfig = AppUpdateManager.Config(
-    appStoreID: "1343105318",
-    isArabic: applicationLanguage != "en"
-)
+let updateConfig = AppUpdateManager.Config(appStoreID: "1343105318")
 ```
 All default values are customizable: 
 ```swift
-let isArabic = applicationLanguage != "en"
-
 let updateConfig = AppUpdateManager.Config(
     appStoreID: "1343105318",
-    isArabic: isArabic,
-    
+
     cacheExpiry: 24 * 60 * 60, // after 24 hrs
     normalReminderInterval: 120 * 60 * 60, // every 5 days
     
@@ -53,37 +47,25 @@ let updateConfig = AppUpdateManager.Config(
     managerOverrideFirebaseKey: "manager_override",
     
     // Normal
-    normalUpdateTitle: isArabic ? "تحديث متوفر" : "Update Available",
-    normalUpdateMessage: isArabic
-        ? "نسخة أحدث من التطبيق متوفرة."
-        : "A newer version is available.",
+    normalUpdateTitle: "تحديث متوفر",
+    normalUpdateMessage: "نسخة أحدث من التطبيق متوفرة.",
     
     // Urgent
-    urgentUpdateTitle: isArabic ? "تحديث موصى به" : "Update Recommended",
-    urgentUpdateMessage: isArabic
-        ? "يرجى التحديث للحصول على أفضل تجربة."
-        : "Please update for the best experience.",
+    urgentUpdateTitle: "تحديث موصى به",
+    urgentUpdateMessage: "يرجى التحديث للحصول على أفضل تجربة.",
     
     // Forced
-    forcedUpdateTitle: isArabic ? "تحديث إلزامي" : "Update Required",
-    forcedUpdateMessage: isArabic
-        ? "يجب عليك التحديث لمواصلة استخدام التطبيق."
-        : "You must update to continue using the app.",
+    forcedUpdateTitle: "تحديث إلزامي",
+    forcedUpdateMessage: "يجب عليك التحديث لمواصلة استخدام التطبيق.",
     
     // Buttons
-    laterButtonTitle: isArabic ? "لاحقاً" : "Later",
-    updateButtonTitle: isArabic ? "تحديث الآن" : "Update Now",
+    laterButtonTitle: "لاحقاً",
+    updateButtonTitle: "تحديث الآن",
     
     // Success
-    updatedSuccessfullyTitle: isArabic
-        ? "🎉 تم تحديث التطبيق بنجاح"
-        : "App Updated Successfully 🎉",
-    
-    updatedSuccessfullyMessage: isArabic
-        ? "شكراً لتحديث التطبيق. استمتع بأحدث المزايا والتحسينات."
-        : "Thanks for updating! Enjoy the latest features and improvements.",
-    
-    successButtonTitle: isArabic ? "حسناً" : "OK"
+    updatedSuccessfullyTitle: "🎉 تم تحديث التطبيق بنجاح",
+    updatedSuccessfullyMessage: "شكراً لتحديث التطبيق. استمتع بأحدث المزايا والتحسينات.",
+    successButtonTitle: "حسناً",
 )
 ```
 
@@ -93,7 +75,13 @@ let updateConfig = AppUpdateManager.Config(
 AppUpdateManager.shared.setup(with: updateConfig) 
 ```
 
-## Step 4 – Check for Updates
+## Step 4 - Localize [OPTIONAL]
+Whenever need to update alert default strings localization
+```swift
+AppUpdateManager.shared.isArabic = applicationLanguage != "en"
+```
+
+## Step 5 – Check for Updates
 => with every base network request (GET, POST, ...)
 
 ```swift
