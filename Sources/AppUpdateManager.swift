@@ -20,7 +20,8 @@ public class AppUpdateManager {
     
     private var updateManager: UpdateManaging?
     private var config: Config?
-    
+    public var isArabic: Bool = false
+
     // MARK: - Public Config
      
     public struct Config {
@@ -28,7 +29,6 @@ public class AppUpdateManager {
         // Must Have ================================
         
         public let appStoreID: String
-        public let isArabic: Bool
         
         // Optional =================================
         
@@ -60,7 +60,6 @@ public class AppUpdateManager {
 
         public init(
             appStoreID: String,
-            isArabic: Bool,
             cacheExpiry: TimeInterval = 24 * 60 * 60,             // 1 day
             normalReminderInterval: TimeInterval = 120 * 60 * 60, // 5 days
             
@@ -85,7 +84,6 @@ public class AppUpdateManager {
             successButtonTitle: String? = nil
         ) {
             self.appStoreID = appStoreID
-            self.isArabic = isArabic
             self.cacheExpiry = cacheExpiry
             self.normalReminderInterval = normalReminderInterval
             
@@ -95,7 +93,7 @@ public class AppUpdateManager {
             
             // Fallback to default Localization Generator
             func localized(ar: String, en: String) -> String {
-                isArabic ? ar : en
+                AppUpdateManager.shared.isArabic ? ar : en
             }
             
             // Normal
