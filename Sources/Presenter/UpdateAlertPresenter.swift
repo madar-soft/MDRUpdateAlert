@@ -135,20 +135,75 @@ private extension UpdateAlertPresenter {
 //MARK: - Localized Strings
 
 private extension UpdateAlertPresenter {
-    // Alert Buttons
-    var normalUpdateTitle: String { config.normalUpdateTitle }
-    var normalUpdateMessage: String { config.normalUpdateMessage }
-
-    var urgentUpdateTitle: String { config.urgentUpdateTitle }
-    var urgentUpdateMessage: String { config.urgentUpdateMessage }
+    // Fallback to default Localization Generator
+    func localized(ar: String, en: String) -> String {
+        AppUpdateManager.shared.isArabic ? ar : en
+    }
     
-    var forcedUpdateTitle: String { config.forcedUpdateTitle }
-    var forcedUpdateMessage: String { config.forcedUpdateMessage }
+    // Normal
+    var normalUpdateTitle: String { config.normalUpdateTitle ?? localized(
+        ar: "تحديث متوفر",
+        en: "Update Available")
+    }
     
-    var laterButtonTitle: String { config.laterButtonTitle }
-    var updateButtonTitle: String { config.updateButtonTitle }
+    var normalUpdateMessage: String { config.normalUpdateMessage ?? localized(
+        ar: "نسخة أحدث من التطبيق متوفرة.",
+        en: "A newer version is available.")
+    }
 
-    var updatedSuccessfullyTitle: String { config.updatedSuccessfullyTitle }
-    var updatedSuccessfullyMessage: String { config.updatedSuccessfullyMessage }
-    var successButtonTitle: String { config.successButtonTitle }
+    // Urgent
+    var urgentUpdateTitle: String { config.urgentUpdateTitle ?? localized(
+        ar: "تحديث موصى به",
+        en: "Update Recommended")
+    }
+    
+    var urgentUpdateMessage: String { config.urgentUpdateMessage ?? localized(
+        ar: "يرجى التحديث للحصول على أفضل تجربة.",
+        en: "Please update for the best experience.")
+    }
+    
+    // Forced
+    var forcedUpdateTitle: String { config.forcedUpdateTitle ?? localized(
+        ar: "تحديث إلزامي",
+        en: "Update Required")
+    }
+    
+    var forcedUpdateMessage: String { config.forcedUpdateMessage ?? localized(
+        ar: "يجب عليك التحديث لمواصلة استخدام التطبيق.",
+        en: "You must update to continue using the app.")
+    }
+    
+    // Buttons
+    var laterButtonTitle: String { config.laterButtonTitle ?? localized(
+        ar: "لاحقاً",
+        en: "Later")
+    }
+    
+    var updateButtonTitle: String { config.updateButtonTitle ?? localized(
+        ar: "تحديث الآن",
+        en: "Update Now")
+    }
+
+    // Success
+    var updatedSuccessfullyTitle: String { config.updatedSuccessfullyTitle ?? localized(
+        ar: "🎉 تم تحديث التطبيق بنجاح",
+        en: "App Updated Successfully 🎉")
+    }
+    
+    var updatedSuccessfullyMessage: String { config.updatedSuccessfullyMessage ?? localized(
+        ar: "شكراً لتحديث التطبيق. استمتع بأحدث المزايا والتحسينات.",
+        en: "Thanks for updating! Enjoy the latest features and improvements."
+    ) }
+    
+    var successButtonTitle: String { config.successButtonTitle ?? localized(
+        ar: "حسناً",
+        en: "OK")
+    }
 }
+
+
+
+
+
+
+

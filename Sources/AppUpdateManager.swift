@@ -42,21 +42,21 @@ public class AppUpdateManager {
         public let managerOverrideFirebaseKey: String
         
         // Alert Strings
-        public let normalUpdateTitle: String
-        public let normalUpdateMessage: String
+        public let normalUpdateTitle: String?
+        public let normalUpdateMessage: String?
 
-        public let urgentUpdateTitle: String
-        public let urgentUpdateMessage: String
+        public let urgentUpdateTitle: String?
+        public let urgentUpdateMessage: String?
         
-        public let forcedUpdateTitle: String
-        public let forcedUpdateMessage: String
+        public let forcedUpdateTitle: String?
+        public let forcedUpdateMessage: String?
         
-        public let laterButtonTitle: String
-        public let updateButtonTitle: String
+        public let laterButtonTitle: String?
+        public let updateButtonTitle: String?
 
-        public let updatedSuccessfullyTitle: String
-        public let updatedSuccessfullyMessage: String
-        public let successButtonTitle: String
+        public let updatedSuccessfullyTitle: String?
+        public let updatedSuccessfullyMessage: String?
+        public let successButtonTitle: String?
         
         public init(
             appStoreID: String,
@@ -78,7 +78,7 @@ public class AppUpdateManager {
             
             laterButtonTitle: String? = nil,
             updateButtonTitle: String? = nil,
-
+            
             updatedSuccessfullyTitle: String? = nil,
             updatedSuccessfullyMessage: String? = nil,
             successButtonTitle: String? = nil
@@ -91,51 +91,22 @@ public class AppUpdateManager {
             self.minimumVersionFirebaseKey = minimumVersionFirebaseKey
             self.managerOverrideFirebaseKey = managerOverrideFirebaseKey
             
-            // Fallback to default Localization Generator
-            func localized(ar: String, en: String) -> String {
-                AppUpdateManager.shared.isArabic ? ar : en
-            }
-            
             // Normal
-            self.normalUpdateTitle = normalUpdateTitle ??
-                localized(ar: "تحديث متوفر", en: "Update Available")
-
-            self.normalUpdateMessage = normalUpdateMessage ??
-                localized(ar: "نسخة أحدث من التطبيق متوفرة.", en: "A newer version is available.")
-            
+            self.normalUpdateTitle = normalUpdateTitle
+            self.normalUpdateMessage = normalUpdateMessage
             // Urgent
-            self.urgentUpdateTitle = urgentUpdateTitle ??
-                localized(ar: "تحديث موصى به", en: "Update Recommended")
-
-            self.urgentUpdateMessage = urgentUpdateMessage ??
-                localized(ar: "يرجى التحديث للحصول على أفضل تجربة.", en: "Please update for the best experience.")
-
+            self.urgentUpdateTitle = urgentUpdateTitle
+            self.urgentUpdateMessage = urgentUpdateMessage
             // Forced
-            self.forcedUpdateTitle = forcedUpdateTitle ??
-                localized(ar: "تحديث إلزامي", en: "Update Required")
-
-            self.forcedUpdateMessage = forcedUpdateMessage ??
-                localized(ar: "يجب عليك التحديث لمواصلة استخدام التطبيق.", en: "You must update to continue using the app.")
-            
+            self.forcedUpdateTitle = forcedUpdateTitle
+            self.forcedUpdateMessage = forcedUpdateMessage
             // Buttons
-            self.laterButtonTitle = laterButtonTitle ??
-                localized(ar: "لاحقاً", en: "Later")
-
-            self.updateButtonTitle = updateButtonTitle ??
-                localized(ar: "تحديث الآن", en: "Update Now")
-
+            self.laterButtonTitle = laterButtonTitle
+            self.updateButtonTitle = updateButtonTitle
             // Success
-            self.updatedSuccessfullyTitle = updatedSuccessfullyTitle ??
-                localized(ar: "🎉 تم تحديث التطبيق بنجاح", en: "App Updated Successfully 🎉")
-            
-            self.updatedSuccessfullyMessage = updatedSuccessfullyMessage ??
-                localized(
-                    ar: "شكراً لتحديث التطبيق. استمتع بأحدث المزايا والتحسينات.",
-                    en: "Thanks for updating! Enjoy the latest features and improvements."
-                )
-            
-            self.successButtonTitle = successButtonTitle ??
-                localized(ar: "حسناً", en: "OK")
+            self.updatedSuccessfullyTitle = updatedSuccessfullyTitle
+            self.updatedSuccessfullyMessage = updatedSuccessfullyMessage
+            self.successButtonTitle = successButtonTitle
         }
         
         var appStoreURL: String {
