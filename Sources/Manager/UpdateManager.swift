@@ -40,7 +40,6 @@ public final class UpdateManager: UpdateManaging {
             // App Updated Successfully 🎉
             if await provider.isAppUpdated && !allowSkip {
                 await presenter?.presentAppUpdatedAlert()
-                await provider.clearCache()
             }
             
             return .none
