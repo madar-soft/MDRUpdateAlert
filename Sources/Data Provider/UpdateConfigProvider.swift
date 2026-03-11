@@ -63,10 +63,32 @@ public actor UpdateConfigProvider {
         // ===================================================
         
         if !didFetchThisSession {
+            // Snapshot the OLD cached version BEFORE fetching/saving anything
+            let previouslyCachedVersion = cacheStore.load()?.appVersion
+            
             do {
                 let remote = try await remoteFetcher.fetchRemoteConfig()
                  
-                // Save to cache
+                // Check if app is already up to date
+                if !remote.latestVersion.isEmpty {
+                    let appStore = Version(remote.latestVersion)
+                    let current = Version(currentVersion)
+                    
+                    if current >= appStore {
+                        if let oldVersion = previouslyCachedVersion {
+                            let cachedAppVersion = Version(oldVersion)
+                            if current > cachedAppVersion {
+                                // Mark updated BEFORE saving new cache
+                                isAppUpdated = true
+                                cacheStore.clear()
+                                didFetchThisSession = true
+                                return nil
+                            }
+                        }
+                    }
+                }
+                
+                // Save to cache only after the update check
                 cacheStore.save(CachedUpdateConfig(
                     appVersion: currentVersion,
                     config: remote,
@@ -74,23 +96,6 @@ public actor UpdateConfigProvider {
                 ))
                 
                 didFetchThisSession = true
-                
-                // Check if app is already up to date
-                if !remote.latestVersion.isEmpty {
-                    let appStore = Version(remote.latestVersion)
-                    let current = Version(currentVersion)
-                     
-                    if current >= appStore {
-                        guard let cached = cacheStore.load() else { return remote }
-                        let cachedAppVersion = Version(cached.appVersion)
-                        
-                        if current > cachedAppVersion {
-                            isAppUpdated = true
-                            return nil
-                        }
-                    }
-                }
-                
                 return remote
                 
             } catch {
