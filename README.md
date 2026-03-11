@@ -70,7 +70,7 @@ let updateConfig = AppUpdateManager.Config(
 ```
 
 ## Step 3 – Setup
-=> inside AppDelegate 
+=> inside AppDelegate, make sure `FirebaseApp.configure()` called first !
 ```swift
 AppUpdateManager.shared.setup(with: updateConfig) 
 ```
