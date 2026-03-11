@@ -89,6 +89,10 @@ func checkforUpdate(strURL: String) {
     let AllowToSkipUpdateAlertsRoutes: Set<String> = [
        ... all critical & important routes ....
     ]
+
+    // make sure language get updated before checkForUpdate()
+    print("AppUpdateManager isArabic set to: \(applicationLanguage != "en")")
+    AppUpdateManager.shared.isArabic = applicationLanguage != "en"
     
     Task {
         let isAllowToSkip = AllowToSkipUpdateAlertsRoutes.contains(strURL)
