@@ -26,11 +26,9 @@ final class FirebaseConfigFetcher: UpdateRemoteFetching {
         self.managerOverrideFirebaseKey = managerOverrideFirebaseKey
         
         // Optional: Configure for development
-        #if DEBUG
         let settings = RemoteConfigSettings()
         settings.minimumFetchInterval = 0
         remoteConfig.configSettings = settings
-        #endif
     }
     
     func fetchRemoteConfig() async throws -> UpdateRemoteConfig {

@@ -9,7 +9,7 @@
 
 public protocol UpdateManaging {
     func checkForUpdate(currentVersion: String, offlineMode: Bool, updateUrl: String, allowSkip: Bool) async -> UpdateState
-    func resetSession() async
+    func resetSession()
 }
 
 //MARK: - Implementation
@@ -19,6 +19,8 @@ public final class UpdateManager: UpdateManaging {
     private let decisionEngine: UpdateDecisionEngine
     private let reminderEngine: UpdateReminderEngine?
     private let presenter: UpdateAlertPresenting?
+    
+    private var hasShownAlertThisSession = false
     
     init(
         provider: UpdateConfigProvider,
@@ -60,21 +62,15 @@ public final class UpdateManager: UpdateManaging {
             return .none
         }
         
-        print("=========== MDRUpdateAlert ===================")
-        print("---------- Current App Data ------------------")
-        print(" * currentVersion => \(currentVersion)")
-        print(" * Offline Mode => \(offlineMode)")
-        print(" * updateUrl => \(updateUrl)")
-        print("---------- Remote or Cached Config -----------")
-        print(" - Latest version: \(config.latestVersion)")
-        print(" - Minimum version: \(config.minimumVersion)")
-        print(" - Manager Override: \(config.managerOverride)")
-        print("---------- Update Decision -------------------")
-        print(" - Update Status: \(state)")
-        print("==============================================")
-         
+        // Allow only once per session, if state not forced
+        if hasShownAlertThisSession && state != .forced {
+            return state
+        }
+        
         // Check if we should show based on reminder timing
         if let reminderEngine = reminderEngine, reminderEngine.shouldShowAlert(for: state) {
+            hasShownAlertThisSession = true // <<<
+            
             await presenter?.presentAlert(
                 for: state, updateURL: updateUrl,
                 onUpdate: { [weak self] in
@@ -93,8 +89,10 @@ public final class UpdateManager: UpdateManaging {
         }
     }
     
-    public func resetSession() async {
-        await provider.resetSession()
-        reminderEngine?.resetSessionState()
+    public func resetSession() {
+        hasShownAlertThisSession = false
     }
 }
+
+
+

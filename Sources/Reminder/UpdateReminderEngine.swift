@@ -12,22 +12,15 @@ import Foundation
 public protocol UpdateReminderEngineProtocol: AnyObject {
     func shouldShowAlert(for state: UpdateState) -> Bool
     func markAlertShown(for state: UpdateState)
-    func resetSessionState()
 }
 
 //MARK: - Implementation
-
-import UIKit
 
 final class UpdateReminderEngine: UpdateReminderEngineProtocol {
     private let store: UpdateReminderStoring
     private let timing: UpdateTimingConfig
     private let now: () -> Date
     
-    // Track if urgent alert was shown in current session
-    private var urgentShownInSession: Bool = false
-    private var lastState: UpdateState = .none  // Track last state
-
     init(
         store: UpdateReminderStoring,
         timing: UpdateTimingConfig,
@@ -39,15 +32,12 @@ final class UpdateReminderEngine: UpdateReminderEngineProtocol {
     }
     
     func shouldShowAlert(for state: UpdateState) -> Bool {
-        lastState = state  // Store the state for markAlertShown
-        
         switch state {
         case .forced:
             return true // ALWAYS show, no questions asked
-            
+        
         case .urgent:
-            if urgentShownInSession { return false }
-            return true // show only once per session
+            return true // SHOW IT every new session for urgency
             
         case .normal:
             guard let lastShown = store.lastShownDate() else { return true } // First time
@@ -59,19 +49,17 @@ final class UpdateReminderEngine: UpdateReminderEngineProtocol {
             return false // Never show
         }
     }
-    
+     
     func markAlertShown(for state: UpdateState) {
-        let currentDate = now()
-        store.saveShownDate(currentDate)
+        switch state {
+        case .normal:
+            store.saveShownDate(now()) // store it to show update alert every "x" days
         
-        // If it was an urgent alert, mark it as shown in this session
-        if state == .urgent {
-            urgentShownInSession = true
+        case .urgent:
+            break // once per sesssion, handled by UpdateManager.hasShownAlertThisSession
+        
+        case .forced, .none:
+            break // No tracking needed
         }
-    }
-    
-    func resetSessionState() {
-        // Called on app cold launch to reset the session flag
-        urgentShownInSession = false
     }
 }

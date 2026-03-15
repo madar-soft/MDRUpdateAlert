@@ -28,7 +28,8 @@ public actor UpdateConfigProvider {
     
     // fetch only once per session
     private var didFetchThisSession = false
-    
+    private var isFetching = false
+
     //MARK: - Init
     
     public init(
@@ -62,13 +63,24 @@ public actor UpdateConfigProvider {
         // STEP 2: Try to fetch from remote (ONCE per session)
         // ===================================================
         
+        // Wait if fetch is in progress — don't race with stale cache
+        while isFetching {
+            try? await Task.sleep(nanoseconds: 100_000_000)  // 0.1s
+        }
+        
         if !didFetchThisSession {
+            isFetching = true
+            didFetchThisSession = true
+            
             // Snapshot the OLD cached version BEFORE fetching/saving anything
             let previouslyCachedVersion = cacheStore.load()?.appVersion
             
             do {
                 let remote = try await remoteFetcher.fetchRemoteConfig()
-                 
+                isFetching = false
+
+                print("🔥 Firebase fetched — latest: \(remote.latestVersion), min: \(remote.minimumVersion), override: \(remote.managerOverride)")
+
                 // Check if app is already up to date
                 if !remote.latestVersion.isEmpty {
                     let appStore = Version(remote.latestVersion)
@@ -81,7 +93,7 @@ public actor UpdateConfigProvider {
                                 // Mark updated BEFORE saving new cache
                                 isAppUpdated = true
                                 cacheStore.clear()
-                                didFetchThisSession = true
+                                isFetching = false
                                 return nil
                             }
                         }
@@ -95,12 +107,13 @@ public actor UpdateConfigProvider {
                     savedAt: Date()
                 ))
                 
-                didFetchThisSession = true
                 return remote
                 
             } catch {
-                print("Failed to fetch remote config: \(error)")
+                print("🔥 Firebase Failed to fetch update remote config: \(error)")
                 // Fetch failed - fall through to cache check
+                isFetching = false
+                didFetchThisSession = false
             }
         }
         
@@ -116,11 +129,6 @@ public actor UpdateConfigProvider {
     }
     
     // MARK: - Helpers
-    
-    // Call this when app starts a new session (cold launch)
-    public func resetSession() {
-        didFetchThisSession = false
-    }
     
     public func clearCache() {
         self.cacheStore.clear()

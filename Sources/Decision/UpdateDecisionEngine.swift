@@ -16,6 +16,12 @@ public struct UpdateDecisionEngine {
         let latest = Version(config.latestVersion)
         let minimum = Version(config.minimumVersion)
         
+        // No update needed — user is already up to date
+        // Override is irrelevant if there's nothing to update
+        if current >= latest {
+            return .none
+        }
+        
         // Manager override (highest priority)
         switch config.managerOverride {
         case "3": return .forced

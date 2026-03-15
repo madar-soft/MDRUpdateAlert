@@ -20,7 +20,9 @@ public class AppUpdateManager {
     
     private var updateManager: UpdateManaging?
     private var config: Config?
+    
     public var isArabic: Bool = true
+    public var protectedScreens: Set<String> = []
 
     // MARK: - Public Config
      
@@ -161,9 +163,7 @@ public class AppUpdateManager {
         )
         
         // Reset session state on setup (app cold launch)
-        Task {
-            await updateManager?.resetSession()
-        }
+        updateManager?.resetSession()
         
         return self
     }
@@ -210,7 +210,7 @@ public class AppUpdateManager {
 
         return findTopViewController(from: root)
     }
-
+    
     @MainActor
     private func findTopViewController(from viewController: UIViewController) -> UIViewController {
         if let presented = viewController.presentedViewController {

@@ -72,7 +72,15 @@ final class UpdateAlertPresenter: UpdateAlertPresenting {
             UIApplication.shared.open(url)
         })
         
-        vc.present(alert, animated: true)
+        guard self.isAllowed(for: state, on: vc) else {
+            self.isPresenting = false
+            return
+        }
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [weak self] in
+            guard let self, self.isPresenting else { return }
+            vc.present(alert, animated: true)
+        }
     }
     
     func presentAppUpdatedAlert() {
@@ -93,6 +101,12 @@ final class UpdateAlertPresenter: UpdateAlertPresenting {
         })
         
         vc.present(alert, animated: true)
+    }
+     
+    private func isAllowed(for state: UpdateState, on vc: UIViewController) -> Bool {
+        guard state != .forced else { return true }
+        let vcName = String(describing: type(of: vc))
+        return !AppUpdateManager.shared.protectedScreens.contains(vcName)
     }
 }
 
