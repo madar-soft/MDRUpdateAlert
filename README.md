@@ -86,16 +86,23 @@ AppUpdateManager.shared.isArabic = applicationLanguage != "en"
 
 ```swift
 func checkforUpdate(strURL: String) {
-    let AllowToSkipUpdateAlertsRoutes: Set<String> = [
-       ... all critical & important routes ....
+    // make sure language updated before checkForUpdate()
+    AppUpdateManager.shared.isArabic = applicationLanguage != "en"
+
+    // don't present update alert over those screens[OPTIONAL]
+    AppUpdateManager.shared.protectedScreens = [
+        String(describing: AuthViewController.self),
+        String(describing: PaymentViewController.self)
     ]
 
-    // make sure language get updated before checkForUpdate()
-    print("AppUpdateManager isArabic set to: \(applicationLanguage != "en")")
-    AppUpdateManager.shared.isArabic = applicationLanguage != "en"
+    // don't present update alert over those routes
+    let protectedRoutes: Set<String> = [
+        domainUrl + "/api/test/auth",
+        domainUrl + "/api/test/payment"
+    ]
     
     Task {
-        let isAllowToSkip = AllowToSkipUpdateAlertsRoutes.contains(strURL)
+        let isAllowToSkip = protectedRoutes.contains(strURL)
         let state = await AppUpdateManager.shared.checkForUpdate(allowSkip: isAllowToSkip)
         print("Update check: \(state)")
     }
