@@ -93,7 +93,6 @@ public actor UpdateConfigProvider {
                                 // Mark updated BEFORE saving new cache
                                 isAppUpdated = true
                                 cacheStore.clear()
-                                isFetching = false
                                 return nil
                             }
                         }

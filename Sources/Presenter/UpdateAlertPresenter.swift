@@ -14,6 +14,7 @@ public protocol UpdateAlertPresenting {
     func presentAlert(
         for state: UpdateState,
         updateURL: String,
+        onPresented: @escaping () -> Void,
         onUpdate: @escaping () -> Void,
         onLater: @escaping () -> Void
     )
@@ -39,16 +40,19 @@ final class UpdateAlertPresenter: UpdateAlertPresenting {
     func presentAlert(
         for state: UpdateState,
         updateURL: String,
+        onPresented: @escaping () -> Void,
         onUpdate: @escaping () -> Void,
         onLater: @escaping () -> Void
     ) {
         guard state != .none else { return }
         guard let vc = viewControllerProvider() else { return }
-        
+       
         // If already presenting an alert, ignore this one completely
         guard !isPresenting else { return }
+        
+        guard self.isAllowed(for: state, on: vc) else { return }
         isPresenting = true
-
+        
         let alertConfig = makeConfig(for: state)
         
         let alert = CenteredAlertController(
@@ -72,14 +76,27 @@ final class UpdateAlertPresenter: UpdateAlertPresenting {
             UIApplication.shared.open(url)
         })
         
-        guard self.isAllowed(for: state, on: vc) else {
-            self.isPresenting = false
-            return
-        }
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [weak self] in
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
             guard let self, self.isPresenting else { return }
-            vc.present(alert, animated: true)
+            
+            // Re-fetch the current top VC at fire time, not schedule time
+            guard let currentVC = self.viewControllerProvider() else {
+                self.isPresenting = false
+                return
+            }
+             
+            // Re-check if still allowed at fire time
+            guard self.isAllowed(for: state, on: currentVC) else {
+                self.isPresenting = false
+                return
+            }
+             
+            // Ensures VC layout is fully settled
+            DispatchQueue.main.async {
+                guard self.isPresenting else { return }
+                onPresented()
+                currentVC.present(alert, animated: true)
+            }
         }
     }
     

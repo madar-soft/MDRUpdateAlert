@@ -69,10 +69,11 @@ public final class UpdateManager: UpdateManaging {
         
         // Check if we should show based on reminder timing
         if let reminderEngine = reminderEngine, reminderEngine.shouldShowAlert(for: state) {
-            hasShownAlertThisSession = true // <<<
-            
             await presenter?.presentAlert(
                 for: state, updateURL: updateUrl,
+                onPresented: { [weak self] in
+                    self?.hasShownAlertThisSession = true // <<<
+                },
                 onUpdate: { [weak self] in
                     self?.reminderEngine?.markAlertShown(for: state)
                 },
