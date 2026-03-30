@@ -30,11 +30,11 @@ import MDRUpdateAlert
 ```
 
 ## Step 2 – Configure
-Minimal config: 
+One-liner config: 
 ```swift
 let updateConfig = AppUpdateManager.Config(appStoreID: "1343105318")
 ```
-All default values are customizable: 
+Default values are customizable: 
 ```swift
 let updateConfig = AppUpdateManager.Config(
     appStoreID: "1343105318",
@@ -86,23 +86,27 @@ AppUpdateManager.shared.isArabic = applicationLanguage != "en"
 
 ```swift
 func checkforUpdate(strURL: String) {
-    // make sure language updated before checkForUpdate()
-    AppUpdateManager.shared.isArabic = applicationLanguage != "en"
+    let domain = "https://api.test.net"
+
+    // don't present update alert over those routes
+    let protectedRoutes: Set<String> = [
+        domain + "/api/test/auth",
+        domain + "/api/test/payment"
+    ]
 
     // don't present update alert over those screens[OPTIONAL]
     AppUpdateManager.shared.protectedScreens = [
         String(describing: AuthViewController.self),
         String(describing: PaymentViewController.self)
     ]
+    
+    // make sure language updated before checkForUpdate()
+    AppUpdateManager.shared.isArabic = applicationLanguage != "en"
 
-    // don't present update alert over those routes
-    let protectedRoutes: Set<String> = [
-        domainUrl + "/api/test/auth",
-        domainUrl + "/api/test/payment"
-    ]
+    // if it's a protected route, it should be allowed to skip
+    let isAllowToSkip = protectedRoutes.contains(strURL)
     
     Task {
-        let isAllowToSkip = protectedRoutes.contains(strURL)
         let state = await AppUpdateManager.shared.checkForUpdate(allowSkip: isAllowToSkip)
         print("Update check: \(state)")
     }
