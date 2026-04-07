@@ -21,21 +21,22 @@ public struct UpdateDecisionEngine {
         if current >= latest {
             return .none
         }
+         
+        // Minimum version check
+        // Override is irrelevant, version not supported
+        if current < minimum {
+            return .forced
+        }
         
-        // Manager override (highest priority)
+        // Manager override
         switch config.managerOverride {
         case "3": return .forced
         case "2": return .urgent
         case "1": return .normal
         default: break
         }
-
-        // Minimum version check
-        if current < minimum {
-            return .forced
-        }
-
-        // Latest version check
+        
+        // Need update check
         if current < latest {
             return .normal
         }
