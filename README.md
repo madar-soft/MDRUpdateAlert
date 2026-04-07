@@ -75,35 +75,36 @@ let updateConfig = AppUpdateManager.Config(
 AppUpdateManager.shared.setup(with: updateConfig) 
 ```
 
-## Step 4 - Localize [OPTIONAL]
-Whenever need to update alert default strings localization
+## Step 4 – Check for Updates
+=> with every screen appearance `OR` every base network request (GET, POST, ...)
 ```swift
-AppUpdateManager.shared.isArabic = applicationLanguage != "en"
+Task {
+    let state = await AppUpdateManager.shared.checkForUpdate()
+    print("Update check: \(state)")
+}
 ```
 
-## Step 5 – Check for Updates
-=> with every base network request (GET, POST, ...)
+## Step 5 – Protected Flows
+if it's not forced update, don't present alert over important flows
+like: Auth, Payment, ...
 
+### Protected Screens
+```swift
+AppUpdateManager.shared.protectedScreens = [
+    String(describing: AuthViewController.self),
+    String(describing: PaymentViewController.self)
+]
+```
+### Protected Routes
 ```swift
 func checkforUpdate(strURL: String) {
     let domain = "https://api.test.net"
 
-    // don't present update alert over those routes
     let protectedRoutes: Set<String> = [
         domain + "/api/test/auth",
         domain + "/api/test/payment"
     ]
 
-    // don't present update alert over those screens[OPTIONAL]
-    AppUpdateManager.shared.protectedScreens = [
-        String(describing: AuthViewController.self),
-        String(describing: PaymentViewController.self)
-    ]
-    
-    // make sure language updated before checkForUpdate()
-    AppUpdateManager.shared.isArabic = applicationLanguage != "en"
-
-    // if it's a protected route, it should be allowed to skip
     let isAllowToSkip = protectedRoutes.contains(strURL)
     
     Task {
@@ -112,6 +113,13 @@ func checkforUpdate(strURL: String) {
     }
 }
 ```
+
+## Step 6 - Localize Alerts
+Whenever need to update alert default strings localization
+```swift
+AppUpdateManager.shared.isArabic = applicationLanguage != "en"
+```
+
 ## Installation
 
 ### Swift Package Manager
