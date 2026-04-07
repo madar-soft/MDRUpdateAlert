@@ -32,13 +32,13 @@ import MDRUpdateAlert
 ## Step 2 – Configure
 One-liner config: 
 ```swift
-let updateConfig = AppUpdateManager.Config(appStoreID: "1343105318")
+let updateConfig = AppUpdateManager.Config(appStoreID: "0123456789")
 ```
 Default values are customizable: 
 ```swift
 let updateConfig = AppUpdateManager.Config(
-    appStoreID: "1343105318",
-
+    appStoreID: "0123456789",
+    
     cacheExpiry: 24 * 60 * 60, // after 24 hrs
     normalReminderInterval: 120 * 60 * 60, // every 5 days
     
