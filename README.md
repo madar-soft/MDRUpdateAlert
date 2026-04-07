@@ -133,7 +133,7 @@ MDRUpdateAlert is available through [Swift Package Manager](https://swift.org/pa
 ```
 https://github.com/madar-soft/MDRUpdateAlert.git
 ```
-3. Set the version rule to **Up to Next Major** from `1.0.0`
+3. Set the version rule to **Up to Next Major** from `1.0.6`
 4. Click **Add Package**
 
 #### Via `Package.swift`
@@ -141,7 +141,7 @@ https://github.com/madar-soft/MDRUpdateAlert.git
 Add MDRUpdateAlert as a dependency in your `Package.swift`:
 ```swift
 dependencies: [
-    .package(url: "https://github.com/madar-soft/MDRUpdateAlert.git", from: "1.0.0")
+    .package(url: "https://github.com/madar-soft/MDRUpdateAlert.git", from: "1.0.6")
 ],
 targets: [
     .target(
