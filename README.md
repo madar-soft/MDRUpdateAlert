@@ -39,14 +39,14 @@ A lightweight iOS SDK for showing update alerts (forced, urgent, or normal), dri
    ```
    git@github.com:madar-soft/MDRUpdateAlert.git
    ```
-4. Set the version rule to **Up to Next Major** from `1.0.6`
+4. Set the version rule to **Up to Next Major** from `1.0.7`
 5. Click **Add Package**
 
 #### Via `Package.swift`
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/madar-soft/MDRUpdateAlert.git", from: "1.0.6")
+    .package(url: "https://github.com/madar-soft/MDRUpdateAlert.git", from: "1.0.7")
 ],
 targets: [
     .target(
