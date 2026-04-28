@@ -7,7 +7,6 @@
 
 import Foundation
 import UIKit
-import FirebaseRemoteConfig
 
 public class AppUpdateManager {
     
