@@ -6,6 +6,33 @@ A lightweight iOS SDK for showing update alerts (forced, urgent, or normal), dri
 > 
 ![firebase](https://github.com/madar-soft/MDRUpdateAlert/blob/main/Media/firebase.png?raw=true)
 
+#### Latest Version (App Store Version)
+```
+latest_version
+```
+
+```
+The newest version available on AppStore
+```
+
+#### Manager Override
+```
+manager_override
+```
+
+```
+Force specific update type (0=Don't Override 1=Normal 2=Urgent 3=Forced 4=None)
+```
+
+#### Minimum Version (App Store Version)
+```
+minimum_version
+```
+
+```
+Minimum supported version
+```
+
 ## Overview
 
 - Supports forced, urgent, and normal updates
@@ -39,14 +66,14 @@ A lightweight iOS SDK for showing update alerts (forced, urgent, or normal), dri
    ```
    git@github.com:madar-soft/MDRUpdateAlert.git
    ```
-4. Set the version rule to **Up to Next Major** from `1.0.7`
+4. Set the version rule to **Up to Next Major** from `1.0.8`
 5. Click **Add Package**
 
 #### Via `Package.swift`
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/madar-soft/MDRUpdateAlert.git", from: "1.0.7")
+    .package(url: "https://github.com/madar-soft/MDRUpdateAlert.git", from: "1.0.8")
 ],
 targets: [
     .target(
@@ -114,11 +141,17 @@ let updateConfig = AppUpdateManager.Config(
     
     cacheExpiry: 24 * 60 * 60,             // 24 hrs
     normalReminderInterval: 120 * 60 * 60, // 5 days
+
+    // inject custom remoteFetcher
+    remoteFetcher: nil, 
     
     latestVersionFirebaseKey: "latest_version",
     minimumVersionFirebaseKey: "minimum_version",
     managerOverrideFirebaseKey: "manager_override",
-    
+
+   // enable/disable congrats alert
+   canCongratsAfterUpdate: false,
+
     // Normal
     normalUpdateTitle: "تحديث متوفر",
     normalUpdateMessage: "نسخة أحدث من التطبيق متوفرة.",
@@ -164,7 +197,8 @@ Task {
 
 ### Step 5 – Protected flows
 
-If the update isn't forced, don't present the alert over sensitive flows like Auth or Payment.
+Don't present the update alerts over sensitive flows like Auth or Payment
+`OR` old iOS versions can't support newer app versions 
 
 #### Protected screens
 
@@ -193,6 +227,15 @@ func checkforUpdate(strURL: String) {
         print("Update check: \(state)")
     }
 }
+```
+
+#### Protected iOS versions
+```swift
+AppUpdateManager.shared.protectediOSVersions = [
+   "17"       // blocks 17.0, 17.4, 17.4.1 — every iOS 17.
+   "17.4"     // blocks 17.4 and 17.4.x.
+   "17.4.1"   // blocks only that exact build.
+]
 ```
 
 ### Step 6 – Localize alerts
