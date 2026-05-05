@@ -25,11 +25,12 @@ public struct UpdateDecisionEngine {
         // Minimum version check
         // Override is irrelevant, version not supported
         if current < minimum {
-            return .forced
+            return config.managerOverride == "4" ? .none : .forced
         }
         
         // Manager override
         switch config.managerOverride {
+        case "4": return .none
         case "3": return .forced
         case "2": return .urgent
         case "1": return .normal

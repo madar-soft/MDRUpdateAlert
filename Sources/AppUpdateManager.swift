@@ -21,7 +21,10 @@ public class AppUpdateManager {
     private var config: Config?
     
     public var isArabic: Bool = true
+    
+    // protected
     public var protectedScreens: Set<String> = []
+    public var protectediOSVersions: Set<String> = []
 
     // MARK: - Public Config
      
@@ -37,10 +40,16 @@ public class AppUpdateManager {
         public let cacheExpiry: TimeInterval
         public let normalReminderInterval: TimeInterval
         
+        // remote fetcher
+        public let remoteFetcher: UpdateRemoteFetching?
+        
         // Firebase Keys
         public let latestVersionFirebaseKey: String
         public let minimumVersionFirebaseKey: String
         public let managerOverrideFirebaseKey: String
+        
+        // congrats Flag
+        public let canCongratsAfterUpdate: Bool
         
         // Alert Strings
         public let normalUpdateTitle: String?
@@ -64,9 +73,13 @@ public class AppUpdateManager {
             cacheExpiry: TimeInterval = 24 * 60 * 60,             // 1 day
             normalReminderInterval: TimeInterval = 120 * 60 * 60, // 5 days
             
+            remoteFetcher: UpdateRemoteFetching? = nil,
+             
             latestVersionFirebaseKey: String = "latest_version",
             minimumVersionFirebaseKey: String = "minimum_version",
             managerOverrideFirebaseKey: String = "manager_override",
+            
+            canCongratsAfterUpdate: Bool = true,
             
             normalUpdateTitle: String? = nil,
             normalUpdateMessage: String? = nil,
@@ -88,9 +101,13 @@ public class AppUpdateManager {
             self.cacheExpiry = cacheExpiry
             self.normalReminderInterval = normalReminderInterval
             
+            self.remoteFetcher = remoteFetcher
+            
             self.latestVersionFirebaseKey = latestVersionFirebaseKey
             self.minimumVersionFirebaseKey = minimumVersionFirebaseKey
             self.managerOverrideFirebaseKey = managerOverrideFirebaseKey
+            
+            self.canCongratsAfterUpdate = canCongratsAfterUpdate
             
             // Normal
             self.normalUpdateTitle = normalUpdateTitle
@@ -130,10 +147,11 @@ public class AppUpdateManager {
             normalReminderInterval: config.normalReminderInterval
         )
          
-        // Create provider with Firebase fetcher
+        // Create provider with Firebase fetcher or Injected remoteFetcher
+        
         let provider = UpdateConfigProvider(
             cacheStore: UserDefaultsCacheStore(),
-            remoteFetcher: FirebaseConfigFetcher(
+            remoteFetcher: config.remoteFetcher ?? FirebaseConfigFetcher(
                 latestVersionFirebaseKey: config.latestVersionFirebaseKey,
                 minimumVersionFirebaseKey: config.minimumVersionFirebaseKey,
                 managerOverrideFirebaseKey: config.managerOverrideFirebaseKey
@@ -229,4 +247,5 @@ public class AppUpdateManager {
         return viewController
     }
 }
+
 

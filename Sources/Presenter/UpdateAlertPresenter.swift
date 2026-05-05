@@ -106,6 +106,8 @@ final class UpdateAlertPresenter: UpdateAlertPresenting {
         // If already presenting an alert, ignore this one completely
         guard !isPresenting else { return }
         isPresenting = true
+        
+        guard config.canCongratsAfterUpdate else { return }
 
         let alert = CenteredAlertController(
             title: updatedSuccessfullyTitle,
@@ -121,6 +123,12 @@ final class UpdateAlertPresenter: UpdateAlertPresenting {
     }
      
     private func isAllowed(for state: UpdateState, on vc: UIViewController) -> Bool {
+        // protected iOS versions (can skip even forced update)
+        let currentOS = UIDevice.current.systemVersion
+        let isOSProtected = AppUpdateManager.shared.protectediOSVersions.contains { currentOS.hasPrefix($0) }
+        if isOSProtected { return false }
+
+        // protected screens
         guard state != .forced else { return true }
         let vcName = String(describing: type(of: vc))
         return !AppUpdateManager.shared.protectedScreens.contains(vcName)

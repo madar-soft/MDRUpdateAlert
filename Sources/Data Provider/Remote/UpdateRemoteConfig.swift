@@ -11,6 +11,16 @@ public struct UpdateRemoteConfig: Codable {
     public let latestVersion: String
     public let minimumVersion: String
     public let managerOverride: String
+    
+    public init(
+        latestVersion: String,
+        minimumVersion: String,
+        managerOverride: String
+    ) {
+        self.latestVersion = latestVersion
+        self.minimumVersion = minimumVersion
+        self.managerOverride = managerOverride
+    }
 }
 
 extension UpdateRemoteConfig: Equatable {
